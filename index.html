@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f8fafc">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Dice">
+
+  <link rel="manifest" href="manifest.webmanifest">
+
+  <title>Dice</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      min-height: 100%;
+      background: #f8fafc;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      min-height: 100dvh;
+      background: #f8fafc;
+      color: #0f172a;
+      font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Helvetica Neue",
+        Arial,
+        sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 680px;
+      min-height: 100vh;
+      min-height: 100dvh;
+      margin: 0 auto;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        18px
+        max(24px, env(safe-area-inset-bottom))
+        18px;
+    }
+
+    .app-header {
+      text-align: center;
+      padding: 10px 0 22px;
+    }
+
+    .app-title {
+      margin: 0;
+      font-size: 34px;
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    .app-subtitle {
+      margin: 7px 0 0;
+      color: #64748b;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .card {
+      background: rgba(255,255,255,.94);
+      border: 1px solid #e2e8f0;
+      border-radius: 24px;
+      box-shadow:
+        0 8px 30px rgba(15,23,42,.07),
+        0 1px 3px rgba(15,23,42,.04);
+    }
+
+    .setup-card {
+      padding: 24px;
+    }
+
+    .setup-title {
+      margin: 0 0 20px;
+      text-align: center;
+      font-size: 23px;
+      font-weight: 750;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin: 0 0 7px 4px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 650;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      min-height: 54px;
+      padding: 0 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      background: #f8fafc;
+      color: #0f172a;
+      outline: none;
+      font-size: 17px;
+      -webkit-appearance: none;
+    }
+
+    input:focus {
+      border-color: #64748b;
+      box-shadow: 0 0 0 3px rgba(100,116,139,.14);
+    }
+
+    .primary-button {
+      width: 100%;
+      min-height: 56px;
+      margin-top: 6px;
+      border: 0;
+      border-radius: 17px;
+      background: #0f172a;
+      color: white;
+      font-size: 17px;
+      font-weight: 700;
+      box-shadow: 0 5px 12px rgba(15,23,42,.16);
+      transition: transform .08s ease, filter .12s ease;
+    }
+
+    .primary-button:active {
+      transform: scale(.98);
+    }
+
+    .game-header {
+      margin-bottom: 16px;
+    }
+
+    .turn-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 13px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .turn-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+
+    .teams {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .team-card {
+      padding: 18px 14px;
+      text-align: center;
+      border-radius: 22px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 5px 18px rgba(15,23,42,.055);
+      transition: transform .15s ease, border-color .15s ease;
+    }
+
+    .team-card.active {
+      border-color: #94a3b8;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 22px rgba(15,23,42,.09);
+    }
+
+    .team-name {
+      min-height: 22px;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 700;
+      overflow-wrap: anywhere;
+    }
+
+    .team-score {
+      margin-top: 5px;
+      font-size: 37px;
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .score-area {
+      margin-top: 22px;
+    }
+
+    .section-label {
+      margin: 0 0 11px 4px;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .score-buttons {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 9px;
+    }
+
+    .score-button {
+      min-height: 54px;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      font-size: 16px;
+      font-weight: 750;
+      transition: transform .08s ease, filter .12s ease;
+    }
+
+    .score-button:active {
+      transform: scale(.94);
+    }
+
+    .points-50 {
+      background: #dcfce7;
+      color: #166534;
+      border-color: #bbf7d0;
+    }
+
+    .points-100 {
+      background: #bbf7d0;
+      color: #166534;
+      border-color: #86efac;
+    }
+
+    .points-150 {
+      background: #86efac;
+      color: #14532d;
+      border-color: #4ade80;
+    }
+
+    .points-200 {
+      background: #4ade80;
+      color: #14532d;
+      border-color: #22c55e;
+    }
+
+    .points-250 {
+      background: #34d399;
+      color: #064e3b;
+      border-color: #10b981;
+    }
+
+    .points-300 {
+      background: #22c55e;
+      color: white;
+      border-color: #16a34a;
+    }
+
+    .points-350 {
+      background: #16a34a;
+      color: white;
+      border-color: #15803d;
+    }
+
+    .points-400 {
+      background: #15803d;
+      color: white;
+      border-color: #166534;
+    }
+
+    .points-450 {
+      background: #166534;
+      color: white;
+      border-color: #14532d;
+    }
+
+    .points-500 {
+      background: #14532d;
+      color: white;
+      border-color: #052e16;
+    }
+
+    .zonk {
+      grid-column: span 2;
+      background: #b91c1c;
+      color: white;
+      border-color: #b91c1c;
+    }
+
+    .other {
+      grid-column: span 3;
+      background: #f1f5f9;
+      color: #334155;
+      border-color: #cbd5e1;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .secondary-button {
+      min-height: 50px;
+      border: 1px solid #cbd5e1;
+      border-radius: 16px;
+      background: white;
+      color: #334155;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .secondary-button:active {
+      transform: scale(.97);
+    }
+
+    .saved-message {
+      margin-top: 16px;
+      text-align: center;
+      color: #64748b;
+      font-size: 12px;
+      font-weight: 550;
+    }
+
+    .manual-card {
+      padding: 22px;
+    }
+
+    .manual-title {
+      margin: 0 0 5px;
+      font-size: 21px;
+      font-weight: 750;
+    }
+
+    .manual-help {
+      margin: 0 0 17px;
+      color: #64748b;
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .manual-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .winner {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(15,23,42,.82);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+    }
+
+    .winner.hidden,
+    .screen.hidden {
+      display: none;
+    }
+
+    .winner-card {
+      width: min(420px, 100%);
+      padding: 34px 24px 26px;
+      border-radius: 28px;
+      background: white;
+      text-align: center;
+      box-shadow: 0 20px 70px rgba(0,0,0,.3);
+      animation: winner-in .35s ease-out;
+    }
+
+    .trophy {
+      font-size: 62px;
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+
+    .winner-card h2 {
+      margin: 0;
+      font-size: 30px;
+      letter-spacing: -.7px;
+    }
+
+    .winner-card p {
+      margin: 9px 0 22px;
+      color: #64748b;
+      font-size: 16px;
+    }
+
+    .confetti {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 101;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 9px;
+      height: 15px;
+      border-radius: 2px;
+      animation: confetti-fall 2.8s linear forwards;
+    }
+
+    @keyframes winner-in {
+      from {
+        opacity: 0;
+        transform: scale(.85);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes confetti-fall {
+      from {
+        transform: translate3d(0,0,0) rotate(0deg);
+      }
+      to {
+        transform: translate3d(var(--drift),110vh,0) rotate(720deg);
+      }
+    }
+
+    @media (max-width: 380px) {
+      .app-shell {
+        padding-left: 13px;
+        padding-right: 13px;
+      }
+
+      .score-buttons {
+        gap: 7px;
+      }
+
+      .score-button {
+        min-height: 51px;
+        font-size: 15px;
+      }
+
+      .team-score {
+        font-size: 32px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: .01ms !important;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="app-shell">
+
+  <header class="app-header">
+    <h1 class="app-title">🎲 Dice</h1>
+    <p class="app-subtitle">First team to 10,000 wins</p>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <div id="setupScreen" class="screen">
+    <div class="card setup-card">
+      <h2 class="setup-title">New Game</h2>
+
+      <form id="setupForm">
+
+        <div class="field">
+          <label for="team1">Team 1</label>
+          <input
+            id="team1"
+            type="text"
+            maxlength="30"
+            placeholder="Enter team name"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <div class="field">
+          <label for="team2">Team 2</label>
+          <input
+            id="team2"
+            type="text"
+            maxlength="30"
+            placeholder="Enter team name"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <button class="primary-button" type="submit">
+          Start Game
+        </button>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="gameScreen" class="screen hidden">
+
+    <div class="game-header">
+      <div class="turn-pill">
+        <span class="turn-dot"></span>
+        <span id="turnText">Team 1's turn</span>
+      </div>
+    </div>
+
+    <div class="teams">
+
+      <div id="teamCard0" class="team-card active">
+        <div id="teamName0" class="team-name">Team 1</div>
+        <div id="score0" class="team-score">0</div>
+      </div>
+
+      <div id="teamCard1" class="team-card">
+        <div id="teamName1" class="team-name">Team 2</div>
+        <div id="score1" class="team-score">0</div>
+      </div>
+
+    </div>
+
+    <div class="score-area">
+      <div class="section-label">Choose Score</div>
+
+      <div class="score-buttons">
+
+        <button class="score-button zonk" data-score="0">
+          ZONK!
+        </button>
+
+        <button class="score-button points-50" data-score="50">
+          50
+        </button>
+
+        <button class="score-button points-100" data-score="100">
+          100
+        </button>
+
+        <button class="score-button points-150" data-score="150">
+          150
+        </button>
+
+        <button class="score-button points-200" data-score="200">
+          200
+        </button>
+
+        <button class="score-button points-250" data-score="250">
+          250
+        </button>
+
+        <button class="score-button points-300" data-score="300">
+          300
+        </button>
+
+        <button class="score-button points-350" data-score="350">
+          350
+        </button>
+
+        <button class="score-button points-400" data-score="400">
+          400
+        </button>
+
+        <button class="score-button points-450" data-score="450">
+          450
+        </button>
+
+        <button class="score-button points-500" data-score="500">
+          500
+        </button>
+
+        <button id="otherButton" class="score-button other">
+          Other
+        </button>
+
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="undoButton" class="secondary-button">
+        ↶ Undo
+      </button>
+
+      <button id="newGameButton" class="secondary-button">
+        New Game
+      </button>
+    </div>
+
+    <div class="saved-message">
+      ✓ Game saved automatically on this device
+    </div>
+
+  </div>
+
+  <!-- MANUAL SCORE SCREEN -->
+  <div id="manualScreen" class="screen hidden">
+
+    <div class="card manual-card">
+
+      <h2 class="manual-title">Enter Score</h2>
+
+      <p class="manual-help">
+        Enter a score of 550 or more.
+        The score must be a multiple of 50.
+      </p>
+
+      <input
+        id="manualScore"
+        type="number"
+        inputmode="numeric"
+        min="550"
+        step="50"
+        placeholder="Example: 750"
+      >
+
+      <div class="manual-actions">
+        <button id="manualCancel" class="secondary-button">
+          Cancel
+        </button>
+
+        <button id="manualSubmit" class="primary-button" style="margin-top:0">
+          Add Score
+        </button>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<!-- WINNER -->
+<div id="winnerOverlay" class="winner hidden">
+
+  <div id="confetti" class="confetti"></div>
+
+  <div class="winner-card">
+
+    <div class="trophy">🏆</div>
+
+    <h2 id="winnerName">Winner!</h2>
+
+    <p id="winnerScore">10,000 points</p>
+
+    <button id="playAgainButton" class="primary-button">
+      Play Again
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+  /* =========================================================
+     GAME STATE
+     ========================================================= */
+
+  const DB_NAME = "dice-game-storage";
+  const DB_VERSION = 1;
+  const STORE_NAME = "game";
+
+  let state = {
+    names: ["Team 1", "Team 2"],
+    scores: [0, 0],
+    turn: 0,
+    history: [],
+    over: false
+  };
+
+  let audioContext = null;
+
+
+  /* =========================================================
+     INDEXEDDB
+     ========================================================= */
+
+  function openDB() {
+    return new Promise((resolve, reject) => {
+
+      const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+      request.onupgradeneeded = () => {
+        const db = request.result;
+
+        if (!db.objectStoreNames.contains(STORE_NAME)) {
+          db.createObjectStore(STORE_NAME);
+        }
+      };
+
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+
+    });
+  }
+
+
+  async function saveState() {
+
+    try {
+
+      const db = await openDB();
+
+      await new Promise((resolve, reject) => {
+
+        const transaction =
+          db.transaction(STORE_NAME, "readwrite");
+
+        transaction.objectStore(STORE_NAME)
+          .put(JSON.parse(JSON.stringify(state)), "current");
+
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+
+      });
+
+      db.close();
+
+    } catch (error) {
+      console.log("Could not save game:", error);
+    }
+  }
+
+
+  async function loadState() {
+
+    try {
+
+      const db = await openDB();
+
+      const saved = await new Promise((resolve, reject) => {
+
+        const transaction =
+          db.transaction(STORE_NAME, "readonly");
+
+        const request =
+          transaction.objectStore(STORE_NAME).get("current");
+
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+
+      });
+
+      db.close();
+
+      return saved || null;
+
+    } catch (error) {
+      console.log("Could not load game:", error);
+      return null;
+    }
+  }
+
+
+  async function clearSaved() {
+
+    try {
+
+      const db = await openDB();
+
+      await new Promise((resolve, reject) => {
+
+        const transaction =
+          db.transaction(STORE_NAME, "readwrite");
+
+        transaction.objectStore(STORE_NAME)
+          .delete("current");
+
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+
+      });
+
+      db.close();
+
+    } catch (error) {
+      console.log("Could not clear saved game:", error);
+    }
+  }
+
+
+  /* =========================================================
+     AUDIO
+     ========================================================= */
+
+  function getAudio() {
+
+    try {
+
+      if (!audioContext) {
+        audioContext =
+          new (window.AudioContext ||
+               window.webkitAudioContext)();
+      }
+
+      if (audioContext.state === "suspended") {
+        audioContext.resume();
+      }
+
+      return audioContext;
+
+    } catch (error) {
+      return null;
+    }
+  }
+
+
+  function scoreSound() {
+
+    const c = getAudio();
+    if (!c) return;
+
+    const n = c.currentTime;
+
+    const o = c.createOscillator();
+    const g = c.createGain();
+
+    o.type = "sine";
+    o.frequency.setValueAtTime(650, n);
+    o.frequency.exponentialRampToValueAtTime(900, n + .08);
+
+    g.gain.setValueAtTime(.0001, n);
+    g.gain.exponentialRampToValueAtTime(.08, n + .01);
+    g.gain.exponentialRampToValueAtTime(.001, n + .12);
+
+    o.connect(g);
+    g.connect(c.destination);
+
+    o.start(n);
+    o.stop(n + .13);
+  }
+
+
+  function zonkSound() {
+
+    const c = getAudio();
+    if (!c) return;
+
+    const n = c.currentTime;
+
+    [[115,.11],[170,.055]].forEach(([f,v]) => {
+
+      const o = c.createOscillator();
+      const g = c.createGain();
+
+      o.type = "square";
+
+      o.frequency.setValueAtTime(f, n);
+      o.frequency.linearRampToValueAtTime(f * .82, n + .32);
+
+      g.gain.setValueAtTime(0, n);
+      g.gain.linearRampToValueAtTime(v, n + .012);
+      g.gain.setValueAtTime(v, n + .24);
+      g.gain.exponentialRampToValueAtTime(.001, n + .38);
+
+      o.connect(g);
+      g.connect(c.destination);
+
+      o.start(n);
+      o.stop(n + .4);
+
+    });
+  }
+
+
+  function victorySound() {
+
+    const c = getAudio();
+    if (!c) return;
+
+    const n = c.currentTime;
+
+    const notes = [
+      [523.25, .16],
+      [659.25, .16],
+      [783.99, .16],
+      [1046.50, .34]
+    ];
+
+    let time = n;
+
+    notes.forEach(([frequency, duration]) => {
+
+      const o = c.createOscillator();
+      const g = c.createGain();
+
+      o.type = "triangle";
+      o.frequency.setValueAtTime(frequency, time);
+
+      g.gain.setValueAtTime(.0001, time);
+      g.gain.exponentialRampToValueAtTime(.16, time + .015);
+      g.gain.exponentialRampToValueAtTime(.001, time + duration);
+
+      o.connect(g);
+      g.connect(c.destination);
+
+      o.start(time);
+      o.stop(time + duration);
+
+      time += duration;
+
+    });
+  }
+
+
+  /* =========================================================
+     SCREEN MANAGEMENT
+     ========================================================= */
+
+  const setupScreen =
+    document.getElementById("setupScreen");
+
+  const gameScreen =
+    document.getElementById("gameScreen");
+
+  const manualScreen =
+    document.getElementById("manualScreen");
+
+
+  function showSetup() {
+
+    setupScreen.classList.remove("hidden");
+    gameScreen.classList.add("hidden");
+    manualScreen.classList.add("hidden");
+
+  }
+
+
+  function showGame() {
+
+    setupScreen.classList.add("hidden");
+    gameScreen.classList.remove("hidden");
+    manualScreen.classList.add("hidden");
+
+    render();
+
+  }
+
+
+  function showManual() {
+
+    setupScreen.classList.add("hidden");
+    gameScreen.classList.add("hidden");
+    manualScreen.classList.remove("hidden");
+
+    const input =
+      document.getElementById("manualScore");
+
+    input.value = "";
+    input.focus();
+
+  }
+
+
+  /* =========================================================
+     RENDER
+     ========================================================= */
+
+  function render() {
+
+    document.getElementById("teamName0").textContent =
+      state.names[0];
+
+    document.getElementById("teamName1").textContent =
+      state.names[1];
+
+    document.getElementById("score0").textContent =
+      state.scores[0].toLocaleString();
+
+    document.getElementById("score1").textContent =
+      state.scores[1].toLocaleString();
+
+    document.getElementById("turnText").textContent =
+      state.names[state.turn] + "'s turn";
+
+    document.getElementById("teamCard0")
+      .classList.toggle("active", state.turn === 0);
+
+    document.getElementById("teamCard1")
+      .classList.toggle("active", state.turn === 1);
+
+    document.getElementById("undoButton").disabled =
+      state.history.length === 0;
+
+  }
+
+
+  /* =========================================================
+     ADD SCORE
+     ========================================================= */
+
+  async function addScore(points) {
+
+    if (state.over) return;
+
+    const team = state.turn;
+
+    state.history.push({
+      names: [...state.names],
+      scores: [...state.scores],
+      turn: state.turn
+    });
+
+    state.scores[team] += points;
+
+    if (points === 0) {
+      zonkSound();
+    } else {
+      scoreSound();
+    }
+
+    if (state.scores[team] >= 10000) {
+
+      state.scores[team] = Math.max(
+        state.scores[team],
+        10000
+      );
+
+      state.over = true;
+
+      render();
+      await saveState();
+
+      showWinner(team);
+
+      victorySound();
+
+      return;
+    }
+
+    state.turn = team === 0 ? 1 : 0;
+
+    render();
+    await saveState();
+
+  }
+
+
+  /* =========================================================
+     SETUP
+     ========================================================= */
+
+  document
+    .getElementById("setupForm")
+    .addEventListener("submit", async event => {
+
+      event.preventDefault();
+
+      const name1 =
+        document.getElementById("team1").value.trim();
+
+      const name2 =
+        document.getElementById("team2").value.trim();
+
+      if (!name1 || !name2) return;
+
+      state = {
+        names: [name1, name2],
+        scores: [0, 0],
+        turn: 0,
+        history: [],
+        over: false
+      };
+
+      await saveState();
+
+      showGame();
+
+    });
+
+
+  /* =========================================================
+     QUICK SCORE BUTTONS
+     ========================================================= */
+
+  document
+    .querySelectorAll("[data-score]")
+    .forEach(button => {
+
+      button.addEventListener("click", () => {
+
+        const points =
+          Number(button.dataset.score);
+
+        addScore(points);
+
+      });
+
+    });
+
+
+  /* =========================================================
+     MANUAL SCORE
+     ========================================================= */
+
+  document
+    .getElementById("otherButton")
+    .addEventListener("click", () => {
+
+      showManual();
+
+    });
+
+
+  document
+    .getElementById("manualCancel")
+    .addEventListener("click", () => {
+
+      showGame();
+
+    });
+
+
+  document
+    .getElementById("manualSubmit")
+    .addEventListener("click", async () => {
+
+      const input =
+        document.getElementById("manualScore");
+
+      const value = Number(input.value);
+
+      if (
+        !Number.isFinite(value) ||
+        value < 550 ||
+        value % 50 !== 0
+      ) {
+
+        alert(
+          "Please enter a score of 550 or more that is a multiple of 50."
+        );
+
+        input.focus();
+
+        return;
+      }
+
+      await addScore(value);
+
+    });
+
+
+  document
+    .getElementById("manualScore")
+    .addEventListener("keydown", event => {
+
+      if (event.key === "Enter") {
+
+        document
+          .getElementById("manualSubmit")
+          .click();
+
+      }
+
+    });
+
+
+  /* =========================================================
+     UNDO
+     ========================================================= */
+
+  document
+    .getElementById("undoButton")
+    .addEventListener("click", async () => {
+
+      if (!state.history.length) return;
+
+      const previous =
+        state.history.pop();
+
+      state.names = previous.names;
+      state.scores = previous.scores;
+      state.turn = previous.turn;
+      state.over = false;
+
+      hideWinner();
+
+      render();
+
+      await saveState();
+
+    });
+
+
+  /* =========================================================
+     NEW GAME
+     ========================================================= */
+
+  async function newGame() {
+
+    const confirmed =
+      confirm("Start a new game? The current game will be cleared.");
+
+    if (!confirmed) return;
+
+    await clearSaved();
+
+    hideWinner();
+
+    state = {
+      names: ["Team 1", "Team 2"],
+      scores: [0, 0],
+      turn: 0,
+      history: [],
+      over: false
+    };
+
+    document.getElementById("team1").value = "";
+    document.getElementById("team2").value = "";
+
+    showSetup();
+
+  }
+
+
+  document
+    .getElementById("newGameButton")
+    .addEventListener("click", newGame);
+
+
+  /* =========================================================
+     WINNER / CONFETTI
+     ========================================================= */
+
+  function showWinner(team) {
+
+    document
+      .getElementById("winnerName")
+      .textContent =
+        state.names[team] + " wins!";
+
+    document
+      .getElementById("winnerScore")
+      .textContent =
+        state.scores[team].toLocaleString() +
+        " points";
+
+    document
+      .getElementById("winnerOverlay")
+      .classList.remove("hidden");
+
+    makeConfetti();
+
+  }
+
+
+  function hideWinner() {
+
+    document
+      .getElementById("winnerOverlay")
+      .classList.add("hidden");
+
+    document
+      .getElementById("confetti")
+      .innerHTML = "";
+
+  }
+
+
+  function makeConfetti() {
+
+    const container =
+      document.getElementById("confetti");
+
+    container.innerHTML = "";
+
+    for (let i = 0; i < 85; i++) {
+
+      const piece =
+        document.createElement("div");
+
+      piece.className = "confetti-piece";
+
+      piece.style.left =
+        Math.random() * 100 + "%";
+
+      piece.style.animationDelay =
+        Math.random() * .8 + "s";
+
+      piece.style.animationDuration =
+        (2.1 + Math.random() * 1.5) + "s";
+
+      piece.style.setProperty(
+        "--drift",
+        (Math.random() * 260 - 130) + "px"
+      );
+
+      const colors = [
+        "#ef4444",
+        "#f59e0b",
+        "#22c55e",
+        "#3b82f6",
+        "#8b5cf6",
+        "#ec4899"
+      ];
+
+      piece.style.background =
+        colors[Math.floor(Math.random() * colors.length)];
+
+      container.appendChild(piece);
+
+    }
+
+  }
+
+
+  document
+    .getElementById("playAgainButton")
+    .addEventListener("click", async () => {
+
+      await clearSaved();
+
+      hideWinner();
+
+      state = {
+        names: ["Team 1", "Team 2"],
+        scores: [0, 0],
+        turn: 0,
+        history: [],
+        over: false
+      };
+
+      document.getElementById("team1").value = "";
+      document.getElementById("team2").value = "";
+
+      showSetup();
+
+    });
+
+
+  /* =========================================================
+     STARTUP
+     ========================================================= */
+
+  (async () => {
+
+    const saved = await loadState();
+
+    if (
+      saved &&
+      Array.isArray(saved.names) &&
+      Array.isArray(saved.scores)
+    ) {
+
+      state = saved;
+
+      if (state.over) {
+        showGame();
+
+        const winningTeam =
+          state.scores[0] >= 10000 ? 0 : 1;
+
+        showWinner(winningTeam);
+
+      } else {
+
+        showGame();
+
+      }
+
+    } else {
+
+      showSetup();
+
+    }
+
+  })();
+
+
+  /* =========================================================
+     SERVICE WORKER
+     ========================================================= */
+
+  if ("serviceWorker" in navigator) {
+
+    window.addEventListener("load", () => {
+
+      navigator.serviceWorker
+        .register("./sw.js")
+        .catch(error => {
+          console.log(
+            "Service worker registration failed:",
+            error
+          );
+        });
+
+    });
+
+  }
+
+</script>
+
+</body>
+</html>
