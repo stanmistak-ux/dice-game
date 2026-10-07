@@ -1,0 +1,14 @@
+{
+  "name": "Dice",
+  "short_name": "Dice",
+  "description": "A two-team scorekeeping game.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#f8fafc",
+  "categories": [
+    "games"
+  ]
+}
