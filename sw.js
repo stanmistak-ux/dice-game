@@ -1,9 +1,12 @@
-const CACHE_NAME = "dice-v1";
+const CACHE_NAME = "dice-v2";
 
 const APP_FILES = [
   "./",
   "./index.html",
-  "./manifest.webmanifest"
+  "./manifest.webmanifest",
+  "./apple-touch-icon.png",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
 self.addEventListener("install", event => {
