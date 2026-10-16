@@ -975,97 +975,99 @@
   }
 
 
-  /* =========================================================
-     SCREEN MANAGEMENT
-     ========================================================= */
+/* =========================================================
+   SCREEN MANAGEMENT
+   ========================================================= */
 
-  const setupScreen =
-    document.getElementById("setupScreen");
+const setupScreen =
+  document.getElementById("setupScreen");
 
-  const gameScreen =
-    document.getElementById("gameScreen");
+const gameScreen =
+  document.getElementById("gameScreen");
 
-  const manualScreen =
-    document.getElementById("manualScreen");
+const manualScreen =
+  document.getElementById("manualScreen");
 
-  const historyScreen =
-    document.getElementById("historyScreen");
-  
-  function showSetup() {
-
-    setupScreen.classList.remove("hidden");
-    gameScreen.classList.add("hidden");
-    manualScreen.classList.add("hidden");
-
-  }
+const historyScreen =
+  document.getElementById("historyScreen");
 
 
-  function showGame() {
+function showSetup() {
+  setupScreen.classList.remove("hidden");
+  gameScreen.classList.add("hidden");
+  manualScreen.classList.add("hidden");
+  historyScreen.classList.add("hidden");
+}
 
-    setupScreen.classList.add("hidden");
-    gameScreen.classList.remove("hidden");
-    manualScreen.classList.add("hidden");
-    historyScreen.classList.add("hidden");
+
+function showGame() {
+  setupScreen.classList.add("hidden");
+  gameScreen.classList.remove("hidden");
+  manualScreen.classList.add("hidden");
+  historyScreen.classList.add("hidden");
 
   render();
-
 }
 
 
-  function showManual() {
+function showManual() {
+  setupScreen.classList.add("hidden");
+  gameScreen.classList.add("hidden");
+  manualScreen.classList.remove("hidden");
+  historyScreen.classList.add("hidden");
 
-    setupScreen.classList.add("hidden");
-    gameScreen.classList.add("hidden");
-    manualScreen.classList.remove("hidden");
+  const input =
+    document.getElementById("manualScore");
 
-  function showHistory() {
+  input.value = "";
+  input.focus();
+}
 
-    setupScreen.classList.add("hidden");
-    gameScreen.classList.add("hidden");
-    manualScreen.classList.add("hidden");
-    historyScreen.classList.remove("hidden");
+
+function showHistory() {
+  setupScreen.classList.add("hidden");
+  gameScreen.classList.add("hidden");
+  manualScreen.classList.add("hidden");
+  historyScreen.classList.remove("hidden");
 
   renderHistory();
-
 }
 
-    
-  function renderHistory() {
 
+function renderHistory() {
   const container =
     document.getElementById("historyContent");
-    container.innerHTML = "";
+
+  container.innerHTML = "";
 
   if (state.history.length === 0) {
+    const message = document.createElement("p");
 
-  const message = document.createElement("p");
     message.textContent =
       "No turns have been recorded yet.";
+
     container.appendChild(message);
-
-  return;
-
+    return;
   }
 
   const table = document.createElement("table");
 
-    table.style.width = "100%";
-    table.style.borderCollapse = "collapse";
-    table.style.fontSize = "14px";
+  table.style.width = "100%";
+  table.style.borderCollapse = "collapse";
+  table.style.fontSize = "14px";
 
   const headers = [
     "Turn",
     "Team",
     "Points",
-    "Team 1 Total",
-    "Team 2 Total"
+    state.names[0] + " Total",
+    state.names[1] + " Total"
   ];
 
   const thead = document.createElement("thead");
   const headerRow = document.createElement("tr");
 
   headers.forEach(label => {
-
     const th = document.createElement("th");
 
     th.textContent = label;
@@ -1074,7 +1076,6 @@
     th.style.textAlign = "left";
 
     headerRow.appendChild(th);
-
   });
 
   thead.appendChild(headerRow);
@@ -1083,7 +1084,6 @@
   const tbody = document.createElement("tbody");
 
   state.history.forEach((before, index) => {
-
     const after =
       index + 1 < state.history.length
         ? state.history[index + 1]
@@ -1105,7 +1105,6 @@
     const row = document.createElement("tr");
 
     values.forEach(value => {
-
       const cell = document.createElement("td");
 
       cell.textContent = String(value);
@@ -1113,28 +1112,14 @@
       cell.style.borderBottom = "1px solid #e2e8f0";
 
       row.appendChild(cell);
-
     });
 
     tbody.appendChild(row);
-
   });
 
   table.appendChild(tbody);
-
   container.appendChild(table);
-
 }
-
-    const input =
-      document.getElementById("manualScore");
-
-    input.value = "";
-    input.focus();
-
-  }
-
-
   /* =========================================================
      RENDER
      ========================================================= */
