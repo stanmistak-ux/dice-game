@@ -632,12 +632,39 @@
       </button>
     </div>
 
+    <button id="historyButton" class="secondary-button" style="width:100%; margin-top:10px;">
+      📋 Score History
+    </button>
+
     <div class="saved-message">
       ✓ Game saved automatically on this device
     </div>
 
   </div>
+<!-- SCORE HISTORY SCREEN -->
+<div id="historyScreen" class="screen hidden">
 
+  <div class="card manual-card">
+
+    <h2 class="manual-title">Score History</h2>
+
+    <p class="manual-help">
+      Review every turn and the running score for both teams.
+    </p>
+
+    <div id="historyContent"></div>
+
+    <button
+      id="historyClose"
+      class="primary-button"
+    >
+      Back to Game
+    </button>
+
+  </div>
+
+</div>
+  
   <!-- MANUAL SCORE SCREEN -->
   <div id="manualScreen" class="screen hidden">
 
@@ -961,7 +988,9 @@
   const manualScreen =
     document.getElementById("manualScreen");
 
-
+  const historyScreen =
+    document.getElementById("historyScreen");
+  
   function showSetup() {
 
     setupScreen.classList.remove("hidden");
@@ -976,10 +1005,11 @@
     setupScreen.classList.add("hidden");
     gameScreen.classList.remove("hidden");
     manualScreen.classList.add("hidden");
+    historyScreen.classList.add("hidden");
 
-    render();
+  render();
 
-  }
+}
 
 
   function showManual() {
@@ -987,6 +1017,114 @@
     setupScreen.classList.add("hidden");
     gameScreen.classList.add("hidden");
     manualScreen.classList.remove("hidden");
+
+  function showHistory() {
+
+    setupScreen.classList.add("hidden");
+    gameScreen.classList.add("hidden");
+    manualScreen.classList.add("hidden");
+    historyScreen.classList.remove("hidden");
+
+  renderHistory();
+
+}
+
+    
+  function renderHistory() {
+
+  const container =
+    document.getElementById("historyContent");
+    container.innerHTML = "";
+
+  if (state.history.length === 0) {
+
+  const message = document.createElement("p");
+    message.textContent =
+      "No turns have been recorded yet.";
+    container.appendChild(message);
+
+  return;
+
+  }
+
+  const table = document.createElement("table");
+
+    table.style.width = "100%";
+    table.style.borderCollapse = "collapse";
+    table.style.fontSize = "14px";
+
+  const headers = [
+    "Turn",
+    "Team",
+    "Points",
+    "Team 1 Total",
+    "Team 2 Total"
+  ];
+
+  const thead = document.createElement("thead");
+  const headerRow = document.createElement("tr");
+
+  headers.forEach(label => {
+
+    const th = document.createElement("th");
+
+    th.textContent = label;
+    th.style.padding = "8px 4px";
+    th.style.borderBottom = "2px solid #cbd5e1";
+    th.style.textAlign = "left";
+
+    headerRow.appendChild(th);
+
+  });
+
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  const tbody = document.createElement("tbody");
+
+  state.history.forEach((before, index) => {
+
+    const after =
+      index + 1 < state.history.length
+        ? state.history[index + 1]
+        : state;
+
+    const team = before.turn;
+
+    const points =
+      after.scores[team] - before.scores[team];
+
+    const values = [
+      index + 1,
+      before.names[team],
+      points === 0 ? "ZONK!" : points.toLocaleString(),
+      after.scores[0].toLocaleString(),
+      after.scores[1].toLocaleString()
+    ];
+
+    const row = document.createElement("tr");
+
+    values.forEach(value => {
+
+      const cell = document.createElement("td");
+
+      cell.textContent = String(value);
+      cell.style.padding = "9px 4px";
+      cell.style.borderBottom = "1px solid #e2e8f0";
+
+      row.appendChild(cell);
+
+    });
+
+    tbody.appendChild(row);
+
+  });
+
+  table.appendChild(tbody);
+
+  container.appendChild(table);
+
+}
 
     const input =
       document.getElementById("manualScore");
@@ -1263,6 +1401,14 @@
   document
     .getElementById("newGameButton")
     .addEventListener("click", newGame);
+
+  document
+    .getElementById("historyButton")
+    .addEventListener("click", showHistory);
+  
+  document
+    .getElementById("historyClose")
+    .addEventListener("click", showGame);
 
 
   /* =========================================================
